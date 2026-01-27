@@ -8,6 +8,8 @@ import { useAdmin } from '@/contexts/AdminContext';
 function ECPreviewPage() {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [ended, setEnded] = useState(false);
+  const [endedRedirectTarget, setEndedRedirectTarget] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
   const { isAdmin } = useAdmin();
@@ -245,13 +247,32 @@ function ECPreviewPage() {
   const handleVideoEnd = () => {
     if (debug) return;
     const shouldRedirect = !!(config?.autoRedirect || config?.globalRedirect);
-    if (shouldRedirect && config?.redirectUrl) {
-      if (config.redirectUrl.startsWith('http://') || config.redirectUrl.startsWith('https://')) {
-        window.location.href = config.redirectUrl;
+    const target = String(config?.redirectUrl || '').trim();
+    if (shouldRedirect && target) {
+      setEndedRedirectTarget(target);
+      const isExternal = target.startsWith('http://') || target.startsWith('https://');
+      if (isExternal) {
+        window.location.replace(target);
       } else {
-        navigate(config.redirectUrl);
+        navigate(target);
       }
+
+      const timeoutId = window.setTimeout(() => {
+        setEnded(true);
+      }, 800);
+
+      window.setTimeout(() => {
+        if (isExternal) {
+          window.location.replace(target);
+        } else {
+          navigate(target);
+        }
+        window.clearTimeout(timeoutId);
+      }, 250);
+      return;
     }
+
+    setEnded(true);
   };
 
   const handleScreenClick = () => {
@@ -375,6 +396,27 @@ function ECPreviewPage() {
         className="relative w-full h-screen overflow-hidden cursor-pointer"
         onClick={handleScreenClick}
       >
+        {ended && !!endedRedirectTarget && !debug && (
+          <div className="absolute bottom-4 left-1/2 z-30 -translate-x-1/2 rounded bg-black/60 px-3 py-2 text-sm text-white">
+            <button
+              type="button"
+              className="underline"
+              onClick={(e) => {
+                e.stopPropagation();
+                const target = String(endedRedirectTarget || '').trim();
+                if (!target) return;
+                if (target.startsWith('http://') || target.startsWith('https://')) {
+                  window.location.replace(target);
+                } else {
+                  navigate(target);
+                }
+              }}
+            >
+              Continuar
+            </button>
+          </div>
+        )}
+
         {debug && (
           <div className="absolute top-2 left-2 z-30 max-w-[90vw] rounded bg-black/60 px-2 py-1 text-[11px] text-white">
             <div>debug/noRedirect: ON</div>
