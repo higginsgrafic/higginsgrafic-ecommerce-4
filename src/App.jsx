@@ -195,6 +195,9 @@ function App() {
   useEffect(() => {
     if (redirectLoading) return;
 
+    const search = (typeof window !== 'undefined' ? window.location?.search : '') || '';
+    const allowPreviewDebug = /[?&](debug|noRedirect)=1\b/.test(search);
+
     const enableInDev = String(import.meta?.env?.VITE_ENABLE_GLOBAL_REDIRECT_IN_DEV || '').toLowerCase() === 'true';
     const hostname = (typeof window !== 'undefined' ? window.location?.hostname : '') || '';
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0';
@@ -231,7 +234,7 @@ function App() {
     }
 
     // Si NO hem de redirigir però estem a ec-preview-lite, sortim
-    if (!shouldRedirect && (isECPreview || isECPreviewLite)) {
+    if (!shouldRedirect && (isECPreview || isECPreviewLite) && !allowPreviewDebug) {
       navigate('/', { replace: true });
       return;
     }
