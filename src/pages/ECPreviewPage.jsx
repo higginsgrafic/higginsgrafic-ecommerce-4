@@ -426,7 +426,7 @@ function ECPreviewPage() {
         )}
 
         {/* Default or Color Background */}
-        {(!config || config.backgroundType === 'color') && (
+        {(effectiveBackgroundType === 'color' || !effectiveBackgroundType) && (
           <div
             className="absolute inset-0 w-full h-full"
             style={getBackgroundStyle()}
