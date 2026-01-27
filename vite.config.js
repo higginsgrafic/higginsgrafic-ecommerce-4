@@ -1,0 +1,42 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+    extensions: ['.js', '.jsx', '.json'],
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    include: ['tests/unit/**/*.test.{js,jsx}', 'tests/unit/**/*.spec.{js,jsx}'],
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 3003,
+    strictPort: true,
+    headers: {
+      'Cache-Control': 'no-store',
+    },
+    middlewareMode: false,
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: 3003,
+  },
+  build: {
+    target: 'es2015',
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    copyPublicDir: true,
+  },
+  assetsInclude: ['**/*.zip', '**/*.tar.gz'],
+})
