@@ -9,7 +9,7 @@ export default function ECPreviewLitePage() {
   const mountedAtRef = useRef(Date.now());
 
   const params = useMemo(() => new URLSearchParams(location.search || ''), [location.search]);
-  const debug = (params.get('debug') || '').trim() === '1';
+  const debug = (params.get('debug') || '').trim() === '1' || (params.get('noRedirect') || '').trim() === '1';
 
   const redirectUrl = (params.get('redirect') || '').trim() || String(import.meta.env.VITE_EC_PREVIEW_LITE_REDIRECT_URL || '').trim();
   const backgroundType = (params.get('bg') || '').trim() || String(import.meta.env.VITE_EC_PREVIEW_LITE_BG || 'video');
@@ -54,6 +54,7 @@ export default function ECPreviewLitePage() {
   }, [debug, backgroundType, effectiveBackgroundType, videoUrl, imageUrl, redirectMode, redirectUrl, showButton, buttonLink]);
 
   const doRedirect = () => {
+    if (debug) return;
     const target = String(redirectUrl || '').trim();
     if (!target) return;
     if (target.startsWith('http://') || target.startsWith('https://')) {
@@ -64,6 +65,7 @@ export default function ECPreviewLitePage() {
   };
 
   useEffect(() => {
+    if (debug) return;
     if (!shouldAutoRedirect) return;
     if (!redirectUrl) return;
     if (redirectMode !== 'immediate') return;
@@ -77,6 +79,7 @@ export default function ECPreviewLitePage() {
   }, [shouldAutoRedirect, redirectUrl, redirectMode, backgroundType, videoUrl]);
 
   const handleVideoEnd = () => {
+    if (debug) return;
     if (!shouldAutoRedirect) return;
     if (!redirectUrl) return;
     if (redirectMode !== 'onEnd') return;
@@ -95,6 +98,7 @@ export default function ECPreviewLitePage() {
   };
 
   const handleScreenClick = () => {
+    if (debug) return;
     if (showButton) return;
 
     const target = String(redirectUrl || buttonLink || '').trim();

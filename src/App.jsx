@@ -220,26 +220,18 @@ function App() {
     const isECPreview = location.pathname === '/ec-preview';
     const isECPreviewLite = location.pathname === '/ec-preview-lite';
 
-    const hasExternalTarget = !!redirectUrl && /^https?:\/\//i.test(redirectUrl);
-
-    // If global redirect is enabled and an external target is configured,
-    // always send non-admin routes outside.
-    if (shouldRedirect && hasExternalTarget && !isAdminRoute && !isECPreview && !isECPreviewLite) {
-      if ((import.meta?.env?.DEV || isLocalhost) && !enableInDev) {
-        return;
-      }
-      window.location.replace(redirectUrl);
+    if ((import.meta?.env?.DEV || isLocalhost) && !enableInDev) {
       return;
     }
 
     // Si hem de redirigir i no estem en una ruta admin ni ja a ec-preview-lite
-    if (shouldRedirect && !isAdminRoute && !isECPreviewLite) {
-      navigate('/ec-preview-lite', { replace: true });
+    if (shouldRedirect && !isAdminRoute && !isECPreview && !isECPreviewLite) {
+      navigate('/ec-preview', { replace: true });
       return;
     }
 
     // Si NO hem de redirigir però estem a ec-preview-lite, sortim
-    if (!shouldRedirect && isECPreviewLite) {
+    if (!shouldRedirect && (isECPreview || isECPreviewLite)) {
       navigate('/', { replace: true });
       return;
     }
@@ -900,7 +892,16 @@ function App() {
                 <Route path="/track" element={<OrderTrackingPage />} />
 
                 {/* Full Screen Media Page */}
-                <Route path="/ec-preview" element={<Navigate to="/ec-preview-lite" replace />} />
+                <Route path="/ec-preview" element={
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <ECPreviewPage />
+                  </motion.div>
+                } />
 
                 <Route path="/ec-preview-lite" element={
                   <motion.div

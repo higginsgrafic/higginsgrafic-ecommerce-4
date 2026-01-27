@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/api/supabase-products';
 import { useAdmin } from '@/contexts/AdminContext';
 
 function ECPreviewPage() {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
   const navigate = useNavigate();
   const { isAdmin } = useAdmin();
+
+  const defaultVideoUrl = '/video/ec-preview-video.mp4';
+  const params = new URLSearchParams(location.search || '');
+  const debug = (params.get('debug') || '').trim() === '1' || (params.get('noRedirect') || '').trim() === '1';
 
   useEffect(() => {
     const shouldMatch = (value) => /\bbolt\b|bolt\.com|bolt\.new|made in bolt/i.test(String(value || ''));
@@ -163,6 +168,7 @@ function ECPreviewPage() {
   useEffect(() => {
     if (!config) return;
     if (isAdmin) return;
+    if (debug) return;
 
     const target = String(config.redirectUrl || '').trim();
     if (!target) return;
@@ -170,9 +176,19 @@ function ECPreviewPage() {
     const effectiveAutoRedirect = !!(config.autoRedirect || config.globalRedirect);
     if (!effectiveAutoRedirect) return;
 
+    const effectiveBackgroundTypeRaw = (config?.backgroundType ?? '').toString().trim();
+    const effectiveBackgroundType =
+      (effectiveAutoRedirect && target)
+        ? 'video'
+        : (effectiveBackgroundTypeRaw || (config?.videoUrl ? 'video' : 'color'));
+    const effectiveVideoUrl =
+      effectiveBackgroundType === 'video'
+        ? (String(config?.videoUrl || '').trim() || defaultVideoUrl)
+        : '';
+
     // If we have a video background, let it play and redirect onEnded.
     // This avoids an instant redirect that makes the video appear to play "at full speed".
-    if (config.backgroundType === 'video' && config.videoUrl) return;
+    if (effectiveBackgroundType === 'video' && effectiveVideoUrl) return;
 
     // Otherwise redirect immediately.
     // This page acts as an under-construction bridge (e.g. to Etsy).
@@ -185,7 +201,7 @@ function ECPreviewPage() {
     }, 50);
 
     return () => window.clearTimeout(timeoutId);
-  }, [config, navigate, isAdmin]);
+  }, [config, navigate, isAdmin, debug]);
 
   const loadECPage = async () => {
     try {
@@ -226,6 +242,7 @@ function ECPreviewPage() {
   };
 
   const handleVideoEnd = () => {
+    if (debug) return;
     const shouldRedirect = !!(config?.autoRedirect || config?.globalRedirect);
     if (shouldRedirect && config?.redirectUrl) {
       if (config.redirectUrl.startsWith('http://') || config.redirectUrl.startsWith('https://')) {
@@ -237,6 +254,22 @@ function ECPreviewPage() {
   };
 
   const handleScreenClick = () => {
+    if (debug) return;
+
+    const hasRedirectTarget = !!String(config?.redirectUrl || '').trim();
+    const effectiveAutoRedirect = !!(config?.autoRedirect || config?.globalRedirect);
+    const effectiveBackgroundTypeRaw = (config?.backgroundType ?? '').toString().trim();
+    const effectiveBackgroundType =
+      (effectiveAutoRedirect && hasRedirectTarget)
+        ? 'video'
+        : (effectiveBackgroundTypeRaw || (config?.videoUrl ? 'video' : 'color'));
+    const effectiveVideoUrl =
+      effectiveBackgroundType === 'video'
+        ? (String(config?.videoUrl || '').trim() || defaultVideoUrl)
+        : '';
+    const isVideoAutoRedirect = effectiveAutoRedirect && hasRedirectTarget && effectiveBackgroundType === 'video' && !!effectiveVideoUrl;
+    if (isVideoAutoRedirect) return;
+
     // Only redirect if there's a button link and button is NOT shown (otherwise button handles it)
     if (config?.buttonLink && !config?.showButton) {
       if (config.buttonLink.startsWith('http://') || config.buttonLink.startsWith('https://')) {
@@ -263,6 +296,18 @@ function ECPreviewPage() {
   const showButton = config?.showButton ?? false;
   const buttonText = config?.buttonText ?? '';
   const buttonLink = config?.buttonLink ?? '/';
+
+  const hasRedirectTarget = !!String(config?.redirectUrl || '').trim();
+  const effectiveAutoRedirect = !!(config?.autoRedirect || config?.globalRedirect);
+  const effectiveBackgroundTypeRaw = (config?.backgroundType ?? '').toString().trim();
+  const effectiveBackgroundType =
+    (effectiveAutoRedirect && hasRedirectTarget)
+      ? 'video'
+      : (effectiveBackgroundTypeRaw || (config?.videoUrl ? 'video' : 'color'));
+  const effectiveVideoUrl =
+    effectiveBackgroundType === 'video'
+      ? (String(config?.videoUrl || '').trim() || defaultVideoUrl)
+      : '';
 
   const isDev = import.meta.env.DEV;
   const showDevNote = isDev && !isAdmin;
@@ -342,21 +387,21 @@ function ECPreviewPage() {
         )}
 
         {/* Background Media */}
-        {config?.backgroundType === 'video' && config.videoUrl && (
+        {effectiveBackgroundType === 'video' && effectiveVideoUrl && (
           <video
             className="absolute inset-0 w-full h-full object-cover pointer-events-none"
             style={{ filter: 'contrast(1.5)', zIndex: 0 }}
             autoPlay
             muted
-            loop={!(String(config.redirectUrl || '').trim() && (config.autoRedirect || config.globalRedirect))}
+            loop={!(hasRedirectTarget && effectiveAutoRedirect)}
             playsInline
             preload="auto"
-            src={config.videoUrl}
+            src={effectiveVideoUrl}
             onEnded={handleVideoEnd}
           />
         )}
 
-        {config?.backgroundType === 'image' && config.imageUrl && (
+        {effectiveBackgroundType === 'image' && config.imageUrl && (
           <div
             className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
             style={{ backgroundImage: `url(${config.imageUrl})` }}
