@@ -589,7 +589,7 @@ function App() {
     return <LoadingScreen />;
   }
 
-  if (error && (!products || products.length === 0)) {
+  if (error && (!products || products.length === 0) && !isECPreviewRoute) {
     console.error('❌ Error loading products:', error);
     return <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="text-center p-8 max-w-md">
