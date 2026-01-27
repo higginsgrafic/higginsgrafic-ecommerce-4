@@ -422,6 +422,8 @@ function ECPreviewPage() {
             <div>debug/noRedirect: ON</div>
             <div>supabase: {supabase ? 'ok' : 'missing env'}</div>
             <div>config: {config ? 'loaded' : 'null'}</div>
+            <div>redirect: {String(!!(config?.autoRedirect || config?.globalRedirect))}</div>
+            <div>redirectUrl: {String(config?.redirectUrl || '')}</div>
             <div>bg: {String(effectiveBackgroundType)}</div>
             <div>video: {String(effectiveVideoUrl)}</div>
           </div>
