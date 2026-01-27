@@ -300,10 +300,16 @@ function ECPreviewPage() {
   const hasRedirectTarget = !!String(config?.redirectUrl || '').trim();
   const effectiveAutoRedirect = !!(config?.autoRedirect || config?.globalRedirect);
   const effectiveBackgroundTypeRaw = (config?.backgroundType ?? '').toString().trim();
-  const effectiveBackgroundType =
-    (effectiveAutoRedirect && hasRedirectTarget)
-      ? 'video'
-      : (effectiveBackgroundTypeRaw || (config?.videoUrl ? 'video' : 'color'));
+
+  // Fallback: if config is missing (e.g. Supabase env not set in Netlify), still show the default video.
+  const effectiveBackgroundType = !config
+    ? 'video'
+    : (
+      (effectiveAutoRedirect && hasRedirectTarget)
+        ? 'video'
+        : (effectiveBackgroundTypeRaw || (config?.videoUrl ? 'video' : 'color'))
+    );
+
   const effectiveVideoUrl =
     effectiveBackgroundType === 'video'
       ? (String(config?.videoUrl || '').trim() || defaultVideoUrl)
@@ -368,6 +374,16 @@ function ECPreviewPage() {
         className="relative w-full h-screen overflow-hidden cursor-pointer"
         onClick={handleScreenClick}
       >
+        {debug && (
+          <div className="absolute top-2 left-2 z-30 max-w-[90vw] rounded bg-black/60 px-2 py-1 text-[11px] text-white">
+            <div>debug/noRedirect: ON</div>
+            <div>supabase: {supabase ? 'ok' : 'missing env'}</div>
+            <div>config: {config ? 'loaded' : 'null'}</div>
+            <div>bg: {String(effectiveBackgroundType)}</div>
+            <div>video: {String(effectiveVideoUrl)}</div>
+          </div>
+        )}
+
         {showDevNote && (
           <div className="fixed inset-0 z-20 flex items-center justify-center pointer-events-none">
             <div
