@@ -323,6 +323,8 @@ function ECPreviewPage() {
   const effectiveAutoRedirect = !!(config?.autoRedirect || config?.globalRedirect);
   const effectiveBackgroundTypeRaw = (config?.backgroundType ?? '').toString().trim();
 
+  const shouldHideContent = effectiveAutoRedirect && hasRedirectTarget;
+
   // Fallback: if config is missing (e.g. Supabase env not set in Netlify), still show the default video.
   const effectiveBackgroundType = !config
     ? 'video'
@@ -478,7 +480,7 @@ function ECPreviewPage() {
         )}
 
         {/* Content */}
-        {(title || subtitle || description || showButton) && (
+        {!shouldHideContent && (title || subtitle || description || showButton) && (
           <div className="relative z-10 h-full flex flex-col justify-center items-center px-6 md:px-12 lg:px-24">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
