@@ -23,6 +23,8 @@ import Checkout from '@/components/Checkout';
 import AdminStudioLayout from '@/components/AdminStudioLayout';
 import SupabaseCollectionRoute from '@/pages/SupabaseCollectionRoute.jsx';
 import DevGuidesOverlay from '@/components/DevGuidesOverlay.jsx';
+import ECPreviewPage from '@/pages/ECPreviewPage';
+import ECPreviewLitePage from '@/pages/ECPreviewLitePage';
 
 const FulfillmentPage = lazy(() => import('@/pages/FulfillmentPage'));
 const FulfillmentSettingsPage = lazy(() => import('@/pages/FulfillmentSettingsPage'));
@@ -57,8 +59,6 @@ const CreativeCommonsPage = lazy(() => import('@/pages/CreativeCommonsPage'));
 const AdminStudioHomePage = lazy(() => import('@/pages/AdminStudioHomePage'));
 const AdminDemosPage = lazy(() => import('@/pages/AdminDemosPage'));
 const IndexPage = lazy(() => import('@/pages/IndexPage'));
-const ECPreviewPage = lazy(() => import('@/pages/ECPreviewPage'));
-const ECPreviewLitePage = lazy(() => import('@/pages/ECPreviewLitePage'));
 const PromotionsManagerPage = lazy(() => import('@/pages/PromotionsManagerPage'));
 const ECConfigPage = lazy(() => import('@/pages/ECConfigPage'));
 const SystemMessagesPage = lazy(() => import('@/pages/SystemMessagesPage'));
