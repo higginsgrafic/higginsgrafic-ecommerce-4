@@ -150,6 +150,8 @@ function App() {
 
   const { cartItems, getTotalItems, getTotalPrice, addToCart, updateQuantity, removeFromCart, updateSize, clearCart, loading, error, products } = productContext;
 
+  const isECPreviewRoute = location.pathname === '/ec-preview' || location.pathname === '/ec-preview-lite';
+
   // ALL HOOKS MUST BE BEFORE ANY EARLY RETURNS
   // Loading state on route change
   useEffect(() => {
@@ -583,7 +585,7 @@ function App() {
     }
   };
 
-  if (loading) {
+  if (loading && !isECPreviewRoute) {
     return <LoadingScreen />;
   }
 
@@ -648,7 +650,7 @@ function App() {
   <ErrorBoundary>
     <>
       <SkipLink />
-      {isNavigating && !isAdminRoute && <LoadingScreen />}
+      {isNavigating && !isAdminRoute && !isECPreviewRoute && <LoadingScreen />}
 
       {adminBannerVisible && <AdminBanner />}
 
