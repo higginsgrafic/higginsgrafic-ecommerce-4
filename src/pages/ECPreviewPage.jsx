@@ -17,6 +17,7 @@ function ECPreviewPage() {
   const debug = (params.get('debug') || '').trim() === '1' || (params.get('noRedirect') || '').trim() === '1';
 
   useEffect(() => {
+    if (debug) return;
     const shouldMatch = (value) => /\bbolt\b|bolt\.com|bolt\.new|made in bolt/i.test(String(value || ''));
 
     const looksLikeBottomRightBadge = (el) => {
@@ -122,7 +123,7 @@ function ECPreviewPage() {
       }
     };
 
-    cleanupBoltNodes(document);
+    cleanupBoltNodes(document.body || document);
 
     const observer = new MutationObserver((mutations) => {
       for (const m of mutations) {
@@ -148,18 +149,18 @@ function ECPreviewPage() {
 
     const startedAt = Date.now();
     const aggressiveIntervalId = window.setInterval(() => {
-      cleanupBoltNodes(document);
-      // Stop after 10s to avoid wasting CPU forever.
-      if (Date.now() - startedAt > 10_000) {
+      cleanupBoltNodes(document.body || document);
+      // Stop quickly to avoid freezing the main thread.
+      if (Date.now() - startedAt > 3_000) {
         window.clearInterval(aggressiveIntervalId);
       }
-    }, 100);
+    }, 500);
 
     return () => {
       observer.disconnect();
       window.clearInterval(aggressiveIntervalId);
     };
-  }, []);
+  }, [debug]);
 
   useEffect(() => {
     loadECPage();
