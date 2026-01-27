@@ -952,6 +952,7 @@ function App() {
                 </Route>
 
                 {/* Legacy admin routes -> redirects to Admin Studio */}
+                <Route path="/admin/demos" element={<Navigate to="/admin/studio/demos" replace />} />
                 <Route path="/index" element={<Navigate to="/admin/studio/index" replace />} />
                 <Route path="/promotions" element={<Navigate to="/admin/studio/promotions" replace />} />
                 <Route path="/ec-config" element={<Navigate to="/admin/studio/ec-config" replace />} />
